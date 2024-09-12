@@ -93,6 +93,8 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -192,7 +194,7 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 vim.keymap.set('n', '<S-l>', '$', { desc = 'Move to end of the line' })
 vim.keymap.set('n', '<S-h>', '0', { desc = 'Move to beginning of the line' })
 vim.keymap.set('i', 'jj', '<Esc>', { desc = 'Change to normal mode' })
-vim.keymap.set('n', '<A-j>', '<cmd>BufferPrevious<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<A-h>', '<cmd>BufferPrevious<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<A-l>', '<cmd>BufferNext<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<A-c>', '<cmd>BufferClose<CR>', { noremap = true, silent = true })
 --vim.keymap.set('n', '<C-t>', '<cmd>BufferPick<CR>', { noremap = true, silent = true })
@@ -216,7 +218,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 })
 -- This is custom key mapping fot toggle nvim tree
 local function open_nvim_tree()
-  require('nvim-tree.api').tree.toggle()
+  require('nvim-tree.api').tree.toggle { update_root = true }
 end
 vim.keymap.set('n', '<C-Z>', open_nvim_tree, { desc = 'Toggle Nvim Tree' })
 
@@ -249,6 +251,35 @@ require('lazy').setup({
   {
     'nvim-tree/nvim-tree.lua',
     opts = {},
+    -- sync_root_with_cwd = true,
+    -- root_dirs = {
+    --   '/home/shu/programming',
+    -- },
+    -- update_focused_file = {
+    --   enable = true,
+    --   update_root = {
+    --     enable = true,
+    --   },
+    -- },
+  },
+  { -- this is command line popup plugin
+    'folke/noice.nvim',
+    event = 'VeryLazy',
+    opts = {
+      routes = {
+        {
+          filter = { event = 'notify', find = 'No information available' },
+          opts = { skip = true },
+        },
+      },
+      presents = {
+        lsp_doc_border = true,
+      },
+    },
+    dependencies = {
+      'MunifTanjim/nui.nvim',
+      'rcarriga/nvim-notify',
+    },
   },
   { 'nvim-tree/nvim-web-devicons', opts = {} },
   { 'nvim-lualine/lualine.nvim', dependencies = { 'nvim-tree/nvim-web-devicons' }, opts = {} },
@@ -276,16 +307,16 @@ require('lazy').setup({
       },
     },
   },
-  { -- for rust LSP
-    'mrcjkb/rustaceanvim',
-    version = '^5',
-    lazy = false,
-    ['rust-analyzer'] = {
-      cargo = {
-        allFeatures = true,
-      },
-    },
-  },
+  -- { -- for rust LSP
+  --   'mrcjkb/rustaceanvim',
+  --   version = '^5',
+  --   lazy = false,
+  --   ['rust-analyzer'] = {
+  --     cargo = {
+  --       allFeatures = true,
+  --     },
+  --   },
+  -- },
   { --toggle terminal plugin
     'akinsho/toggleterm.nvim',
     opts = {
@@ -472,7 +503,26 @@ require('lazy').setup({
       end, { desc = '[S]earch [N]eovim files' })
     end,
   },
-
+  {
+    'goolord/alpha-nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      local dashboard = require 'alpha.themes.dashboard'
+      local startify = require 'alpha.themes.startify'
+      startify.file_icons.provider = 'devicons'
+      require('alpha').setup(require('alpha.themes.dashboard').config)
+      dashboard.section.buttons.val = {
+        dashboard.button('n', '   New file', ':ene <BAR> startinsert <CR>'),
+        dashboard.button('t', '   Open Terminal', ':cd $HOME | ToggleTerm<CR>'),
+        dashboard.button('f', '󰮗   Find file', ':cd $HOME | Telescope find_files<CR>'),
+        dashboard.button('e', '   File Explorer', ':cd $HOME/programming | NvimTreeOpen<CR>'),
+        dashboard.button('r', '   Recent', ':Telescope oldfiles<CR>'),
+        dashboard.button('c', '   Configuration', ':e ~/.config/nvim/lua/user/config.lua<CR>'),
+        dashboard.button('R', '󱘞   Ripgrep', ':Telescope live_grep<CR>'),
+        dashboard.button('q', '󰗼   Quit', ':qa<CR>'),
+      }
+    end,
+  },
   -- LSP Plugins
   {
     -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
@@ -644,7 +694,7 @@ require('lazy').setup({
         -- clangd = {},
         -- gopls = {},
         -- pyright = {},
-        -- rust_analyzer = {},
+        rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -652,6 +702,50 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
         -- tsserver = {},
+        ts_ls = {},
+        html = {},
+        biome = {},
+        tailwindcss = {
+          filetypes = {
+            --   'astro',
+            --   'astro-markdown',
+            --   'clojure',
+            --   'django-html',
+            --   'htmldjango',
+            --   'ejs',
+            --   'erb',
+            --   'eruby',
+            --   'gohtml',
+            --   'gohtmltmpl',
+            --   'hbs',
+            'html',
+            --   'htmlangular',
+            --   'html-eex',
+            --   'heex',
+            --   'jade',
+            --   'leaf',
+            --   'liquid',
+            --   'markdown',
+            --   'mdx',
+            --   'mustache',
+            --   'njk',
+            --   'css',
+            --   'less',
+            --   'postcss',
+            --   'sass',
+            --   'scss',
+            --   'stylus',
+            --   'sugarss',
+            --   'javascript',
+            --   'javascriptreact',
+            --   'rescript',
+            --   'typescript',
+            --   'typescriptreact',
+            --   'vue',
+            --   'svelte',
+            --   'templ',
+          },
+        },
         --
 
         lua_ls = {
