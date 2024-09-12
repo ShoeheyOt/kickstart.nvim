@@ -524,8 +524,9 @@ require('lazy').setup({
       local cwd = vim.fn.getcwd()
       dashboard.section.buttons.val = {
         button('n', '   New file', ':ene <BAR> startinsert <CR>'),
-        button('t', '   Open Terminal', ':cd $HOME | ToggleTerm<CR>'),
-        button('f', '󰮗   Find file', ':cd $HOME | Telescope find_files<CR>'),
+        button('t', '   Open Terminal', ':cd $HOME/programming | ToggleTerm<CR>'),
+        button('f', '󰮗   Find file', ':cd $HOME/programming | Telescope find_files<CR>'),
+        button('d', '󰥨   Find Directory', ':e /home/shu/programming/'),
         button('e', '   File Explorer', ':NvimTreeOpen<CR>'),
         button('r', '   Recent', ':Telescope oldfiles<CR>'),
         button('c', '   Configuration', ':e ~/.config/nvim/lua/user/config.lua<CR>'),
