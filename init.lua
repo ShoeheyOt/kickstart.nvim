@@ -1,4 +1,4 @@
---[[
+--[[j
 
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
@@ -251,16 +251,16 @@ require('lazy').setup({
   {
     'nvim-tree/nvim-tree.lua',
     opts = {},
-    -- sync_root_with_cwd = true,
-    -- root_dirs = {
-    --   '/home/shu/programming',
-    -- },
-    -- update_focused_file = {
-    --   enable = true,
-    --   update_root = {
-    --     enable = true,
-    --   },
-    -- },
+    sync_root_with_cwd = true,
+    root_dirs = {
+      '/home/shu/programming',
+    },
+    update_focused_file = {
+      enable = true,
+      update_root = {
+        enable = true,
+      },
+    },
   },
   { -- this is command line popup plugin
     'folke/noice.nvim',
@@ -509,19 +509,65 @@ require('lazy').setup({
     config = function()
       local dashboard = require 'alpha.themes.dashboard'
       local startify = require 'alpha.themes.startify'
+
       startify.file_icons.provider = 'devicons'
-      require('alpha').setup(require('alpha.themes.dashboard').config)
+
+      -- Create a helper function to format buttons
+      local function button(char, text, command)
+        return dashboard.button(char, text, command)
+      end
+
+      -- Setup alpha with dashboard theme
+      require('alpha').setup(dashboard.config)
+
+      -- Define dashboard buttons
+      local cwd = vim.fn.getcwd()
       dashboard.section.buttons.val = {
-        dashboard.button('n', '   New file', ':ene <BAR> startinsert <CR>'),
-        dashboard.button('t', '   Open Terminal', ':cd $HOME | ToggleTerm<CR>'),
-        dashboard.button('f', '󰮗   Find file', ':cd $HOME | Telescope find_files<CR>'),
-        dashboard.button('e', '   File Explorer', ':cd $HOME/programming | NvimTreeOpen<CR>'),
-        dashboard.button('r', '   Recent', ':Telescope oldfiles<CR>'),
-        dashboard.button('c', '   Configuration', ':e ~/.config/nvim/lua/user/config.lua<CR>'),
-        dashboard.button('R', '󱘞   Ripgrep', ':Telescope live_grep<CR>'),
-        dashboard.button('q', '󰗼   Quit', ':qa<CR>'),
+        button('n', '   New file', ':ene <BAR> startinsert <CR>'),
+        button('t', '   Open Terminal', ':cd $HOME | ToggleTerm<CR>'),
+        button('f', '󰮗   Find file', ':cd $HOME | Telescope find_files<CR>'),
+        button('e', '   File Explorer', ':NvimTreeOpen<CR>'),
+        button('r', '   Recent', ':Telescope oldfiles<CR>'),
+        button('c', '   Configuration', ':e ~/.config/nvim/lua/user/config.lua<CR>'),
+        button('R', '󱘞   Ripgrep', ':Telescope live_grep<CR>'),
+        button('q', '󰗼   Quit', ':qa<CR>'),
+      }
+
+      -- Optionally, you can add a section to display the current working directory
+      dashboard.section.header.val = {
+        [[                                  __]],
+        [[     ___     ___    ___   __  __ /\_\    ___ ___]],
+        [[    / _ `\  / __`\ / __`\/\ \/\ \\/\ \  / __` __`\]],
+        [[   /\ \/\ \/\  __//\ \_\ \ \ \_/ |\ \ \/\ \/\ \/\ \]],
+        [[   \ \_\ \_\ \____\ \____/\ \___/  \ \_\ \_\ \_\ \_\]],
+        [[    \/_/\/_/\/____/\/___/  \/__/    \/_/\/_/\/_/\/_/]],
+        [[                                                    ]],
+      }
+      dashboard.section.footer.val = {
+        [[]],
+        [[🏠 Current Working Directory: ]],
+        cwd,
       }
     end,
+    -- config = function()
+    --   local function get_cwd()
+    --     return  vim.fn.getcwd()
+    --   end
+    --   local dashboard = require 'alpha.themes.dashboard'
+    --   local startify = require 'alpha.themes.startify'
+    --   startify.file_icons.provider = 'devicons'
+    --   require('alpha').setup(require('alpha.themes.dashboard').config)
+    --   dashboard.section.buttons.val = {
+    --     dashboard.button('n', '   New file', ':ene <BAR> startinsert <CR>'),
+    --     dashboard.button('t', '   Open Terminal', ':cd $HOME | ToggleTerm<CR>'),
+    --     dashboard.button('f', '󰮗   Find file', ':cd $HOME | Telescope find_files<CR>'),
+    --     dashboard.button('e', '   File Explorer', [[get_cwd() | NvimTreeOpen<CR>]]),
+    --     dashboard.button('r', '   Recent', ':Telescope oldfiles<CR>'),
+    --     dashboard.button('c', '   Configuration', ':e ~/.config/nvim/lua/user/config.lua<CR>'),
+    --     dashboard.button('R', '󱘞   Ripgrep', ':Telescope live_grep<CR>'),
+    --     dashboard.button('q', '󰗼   Quit', ':qa<CR>'),
+    --   }
+    -- end,
   },
   -- LSP Plugins
   {
@@ -704,7 +750,11 @@ require('lazy').setup({
         -- tsserver = {},
         ts_ls = {},
         html = {},
-        biome = {},
+        biome = {
+          opts = {
+            root_dir = '$/home/shu/Documents/biome.json',
+          },
+        },
         tailwindcss = {
           filetypes = {
             --   'astro',
@@ -832,15 +882,17 @@ require('lazy').setup({
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
+        rust = { 'rustfmt', lsp_format = 'fallback' },
         -- You can use 'stop_after_first' to run the first available formatter from the list
-        javascript = { 'prettier', stop_after_first = true },
-        javascriptreact = { 'prettier', stop_after_first = true },
-        typescript = { 'prettier', stop_after_first = true },
-        typescriptreact = { 'prettier', stop_after_first = true },
+        -- javascript = { 'prettier', stop_after_first = true },
+        -- javascriptreact = { 'prettier', stop_after_first = true },
+        -- typescript = { 'prettier', stop_after_first = true },
+        -- typescriptreact = { 'prettier', stop_after_first = true },
       },
     },
   },
-
+  --autocompletion for commandline
+  'hrsh7th/cmp-cmdline',
   { -- Autocompletion
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
@@ -876,6 +928,7 @@ require('lazy').setup({
       --  into multiple repos for maintenance purposes.
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
+      { 'hrsh7th/cmp-cmdline' },
     },
     config = function()
       -- See `:help cmp`
@@ -953,6 +1006,26 @@ require('lazy').setup({
           { name = 'luasnip' },
           { name = 'path' },
         },
+        require('cmp').setup.cmdline('/', {
+          mapping = cmp.mapping.preset.cmdline(),
+          sources = {
+            { name = 'buffer' },
+          },
+        }),
+        -- `:` cmdline setup.
+        cmp.setup.cmdline(':', {
+          mapping = cmp.mapping.preset.cmdline(),
+          sources = cmp.config.sources({
+            { name = 'path' },
+          }, {
+            {
+              name = 'cmdline',
+              option = {
+                ignore_cmds = { 'Man', '!' },
+              },
+            },
+          }),
+        }),
       }
     end,
   },
