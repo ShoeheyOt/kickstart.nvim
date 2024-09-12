@@ -756,47 +756,7 @@ require('lazy').setup({
             root_dir = '$/home/shu/Documents/biome.json',
           },
         },
-        tailwindcss = {
-          filetypes = {
-            --   'astro',
-            --   'astro-markdown',
-            --   'clojure',
-            --   'django-html',
-            --   'htmldjango',
-            --   'ejs',
-            --   'erb',
-            --   'eruby',
-            --   'gohtml',
-            --   'gohtmltmpl',
-            --   'hbs',
-            'html',
-            --   'htmlangular',
-            --   'html-eex',
-            --   'heex',
-            --   'jade',
-            --   'leaf',
-            --   'liquid',
-            --   'markdown',
-            --   'mdx',
-            --   'mustache',
-            --   'njk',
-            --   'css',
-            --   'less',
-            --   'postcss',
-            --   'sass',
-            --   'scss',
-            --   'stylus',
-            --   'sugarss',
-            --   'javascript',
-            --   'javascriptreact',
-            --   'rescript',
-            --   'typescript',
-            --   'typescriptreact',
-            --   'vue',
-            --   'svelte',
-            --   'templ',
-          },
-        },
+        tailwindcss = {},
         --
 
         lua_ls = {
@@ -845,7 +805,28 @@ require('lazy').setup({
       }
     end,
   },
-
+  {
+    'NvChad/nvim-colorizer.lua',
+    opts = {
+      user_default_options = {
+        tailwind = true,
+      },
+    },
+  },
+  -- {
+  --   'hrsh7th/nvim-cmp',
+  --   dependencies = {
+  --     { 'roobert/tailwindcss-colorizer-cmp.nvim', config = true },
+  --   },
+  --   opts = function(_, opts)
+  --     -- original LazyVim kind icon formatter
+  --     local format_kinds = opts.formatting.format
+  --     opts.formatting.format = function(entry, item)
+  --       format_kinds(entry, item) -- add icons
+  --       return require('tailwindcss-colorizer-cmp').formatter(entry, item)
+  --     end
+  --   end,
+  -- },
   { -- Autoformat
     'stevearc/conform.nvim',
     event = { 'BufWritePre' },
@@ -885,6 +866,7 @@ require('lazy').setup({
         --
         rust = { 'rustfmt', lsp_format = 'fallback' },
         -- You can use 'stop_after_first' to run the first available formatter from the list
+        html = { 'prettier', stop_after_first = true },
         -- javascript = { 'prettier', stop_after_first = true },
         -- javascriptreact = { 'prettier', stop_after_first = true },
         -- typescript = { 'prettier', stop_after_first = true },
@@ -930,106 +912,108 @@ require('lazy').setup({
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
       { 'hrsh7th/cmp-cmdline' },
+      { 'roobert/tailwindcss-colorizer-cmp.nvim', config = true },
     },
-    config = function()
-      -- See `:help cmp`
-      local cmp = require 'cmp'
-      local luasnip = require 'luasnip'
-      luasnip.config.setup {}
-
-      cmp.setup {
-        snippet = {
-          expand = function(args)
-            luasnip.lsp_expand(args.body)
-          end,
-        },
-        completion = { completeopt = 'menu,menuone,noinsert' },
-
-        -- For an understanding of why these mappings were
-        -- chosen, you will need to read `:help ins-completion`
-        --
-        -- No, but seriously. Please read `:help ins-completion`, it is really good!
-        mapping = cmp.mapping.preset.insert {
-          -- Select the [n]ext item
-          ['<C-n>'] = cmp.mapping.select_next_item(),
-          -- Select the [p]revious item
-          ['<C-p>'] = cmp.mapping.select_prev_item(),
-
-          -- Scroll the documentation window [b]ack / [f]orward
-          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
-
-          -- Accept ([y]es) the completion.
-          --  This will auto-import if your LSP supports it.
-          --  This will expand snippets if the LSP sent a snippet.
-          ['<C-y>'] = cmp.mapping.confirm { select = true },
-
-          -- If you prefer more traditional completion keymaps,
-          -- you can uncomment the following lines
-          --['<CR>'] = cmp.mapping.confirm { select = true },
-          --['<Tab>'] = cmp.mapping.select_next_item(),
-          --['<S-Tab>'] = cmp.mapping.select_prev_item(),
-
-          -- Manually trigger a completion from nvim-cmp.
-          --  Generally you don't need this, because nvim-cmp will display
-          --  completions whenever it has completion options available.
-          ['<C-Space>'] = cmp.mapping.complete {},
-
-          -- Think of <c-l> as moving to the right of your snippet expansion.
-          --  So if you have a snippet that's like:
-          --  function $name($args)
-          --    $body
-          --  end
-          --
-          -- <c-l> will move you to the right of each of the expansion locations.
-          -- <c-h> is similar, except moving you backwards.
-          ['<C-l>'] = cmp.mapping(function()
-            if luasnip.expand_or_locally_jumpable() then
-              luasnip.expand_or_jump()
-            end
-          end, { 'i', 's' }),
-          ['<C-h>'] = cmp.mapping(function()
-            if luasnip.locally_jumpable(-1) then
-              luasnip.jump(-1)
-            end
-          end, { 'i', 's' }),
-
-          -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
-          --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
-        },
-        sources = {
-          {
-            name = 'lazydev',
-            -- set group index to 0 to skip loading LuaLS completions as lazydev recommends it
-            group_index = 0,
-          },
-          { name = 'nvim_lsp' },
-          { name = 'luasnip' },
-          { name = 'path' },
-        },
-        require('cmp').setup.cmdline('/', {
-          mapping = cmp.mapping.preset.cmdline(),
-          sources = {
-            { name = 'buffer' },
-          },
-        }),
-        -- `:` cmdline setup.
-        cmp.setup.cmdline(':', {
-          mapping = cmp.mapping.preset.cmdline(),
-          sources = cmp.config.sources({
-            { name = 'path' },
-          }, {
-            {
-              name = 'cmdline',
-              option = {
-                ignore_cmds = { 'Man', '!' },
-              },
-            },
-          }),
-        }),
-      }
-    end,
   },
+  config = function()
+    -- See `:help cmp`
+    local cmp = require 'cmp'
+    local luasnip = require 'luasnip'
+    luasnip.config.setup {}
+
+    cmp.setup {
+      snippet = {
+        expand = function(args)
+          luasnip.lsp_expand(args.body)
+        end,
+      },
+      completion = { completeopt = 'menu,menuone,noinsert' },
+
+      -- For an understanding of why these mappings were
+      -- chosen, you will need to read `:help ins-completion`
+      --
+      -- No, but seriously. Please read `:help ins-completion`, it is really good!
+      mapping = cmp.mapping.preset.insert {
+        -- Select the [n]ext item
+        ['<C-n>'] = cmp.mapping.select_next_item(),
+        -- Select the [p]revious item
+        ['<C-p>'] = cmp.mapping.select_prev_item(),
+
+        -- Scroll the documentation window [b]ack / [f]orward
+        ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+        ['<C-f>'] = cmp.mapping.scroll_docs(4),
+
+        -- Accept ([y]es) the completion.
+        --  This will auto-import if your LSP supports it.
+        --  This will expand snippets if the LSP sent a snippet.
+        ['<C-y>'] = cmp.mapping.confirm { select = true },
+
+        -- If you prefer more traditional completion keymaps,
+        -- you can uncomment the following lines
+        --['<CR>'] = cmp.mapping.confirm { select = true },
+        --['<Tab>'] = cmp.mapping.select_next_item(),
+        --['<S-Tab>'] = cmp.mapping.select_prev_item(),
+
+        -- Manually trigger a completion from nvim-cmp.
+        --  Generally you don't need this, because nvim-cmp will display
+        --  completions whenever it has completion options available.
+        ['<C-Space>'] = cmp.mapping.complete {},
+
+        -- Think of <c-l> as moving to the right of your snippet expansion.
+        --  So if you have a snippet that's like:
+        --  function $name($args)
+        --    $body
+        --  end
+        --
+        -- <c-l> will move you to the right of each of the expansion locations.
+        -- <c-h> is similar, except moving you backwards.
+        ['<C-l>'] = cmp.mapping(function()
+          if luasnip.expand_or_locally_jumpable() then
+            luasnip.expand_or_jump()
+          end
+        end, { 'i', 's' }),
+        ['<C-h>'] = cmp.mapping(function()
+          if luasnip.locally_jumpable(-1) then
+            luasnip.jump(-1)
+          end
+        end, { 'i', 's' }),
+
+        -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
+        --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
+      },
+      sources = {
+        {
+          name = 'lazydev',
+          -- set group index to 0 to skip loading LuaLS completions as lazydev recommends it
+          group_index = 0,
+        },
+        { name = 'nvim_lsp' },
+        { name = 'luasnip' },
+        { name = 'path' },
+      },
+      require('cmp').setup.cmdline('/', {
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = {
+          { name = 'buffer' },
+        },
+      }),
+      -- `:` cmdline setup.
+      cmp.setup.cmdline(':', {
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = cmp.config.sources({
+          { name = 'path' },
+        }, {
+          {
+            name = 'cmdline',
+            option = {
+              ignore_cmds = { 'Man', '!' },
+            },
+          },
+        }),
+      }),
+    }
+  end,
+
   {
     'windwp/nvim-ts-autotag',
     lazy = false,
